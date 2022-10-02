@@ -13,7 +13,7 @@ class Repo {
 public:
 	Repo();
 	PlayerHashMap<20000> players;
-	
+	Trie players_trie;
 	// For reference so that we can 
 	// create the tree asynchronously.
 	std::vector<int> player_ids;
@@ -46,11 +46,21 @@ void read_players_file(Repo & repo) {
 		success = get_next_player(file, p);
 		if (success) {
 			repo.players.insert(p);
+			repo.player_ids.push_back(p.id);
 			++n_players;
 			//std::cout << std::string(p);
 		}
 	}
 	std::cout << "N-players: " << n_players << '\n';
+}
+
+void generate_name_trie(Repo & repo) {
+	for (auto& id : repo.player_ids) {
+		Player p = repo.players.find(id);
+		std::string name = p.name;
+
+		repo.players_trie.insert(name, id);
+	}
 }
 	
 int main() {
@@ -63,7 +73,24 @@ int main() {
 
 	//int result = a.get();
 
-	read_players_file(*repo);
+	{
+		Clock this_clock("Read Players File");
+		read_players_file(*repo);
+	}
+	{
+		Clock this_clock("Generate Name Trie");
+		generate_name_trie(*repo);
+	}
+
+	while (true) {
+		std::string name_str;
+		std::cout << "Digite o nome:\n>>>\t";
+		std::getline(std::cin, name_str);
+
+		int player_id = repo->players_trie.find(name_str);
+		std::cout << "Player id is " << player_id << "\n";
+		
+	}
 
 	//printf("Hello, world!\n");
 	return 0;

@@ -9,6 +9,7 @@
 #include <iostream>
 #include <fstream>
 #include <array>
+#include <optional>
 
 class Player {
 public:
@@ -27,8 +28,7 @@ template<typename K, typename T, unsigned int size>
 class HashMap {
 public:
 	HashMap();
-	T find(unsigned int hash);
-	T find(std::string name);
+	T find(K name);
 	void insert(T item);
 
 	virtual unsigned int get_key_hash(K) = 0;
@@ -36,18 +36,35 @@ public:
 
 private:
 	std::array<T, size> items;
+	std::array<K, size> keys;
 	std::array<bool, size> item_used;
 };
 
 //template<typename K, typename T>
 //class OrderedMap {
-//public://
-//	Set();
-//	T find(T value);
+//public:
+//	OrderedMap();
+//	T find(K key);
+//	void add(K key, T value);
 //
+//private:
+//	std::vector<T> items;
 //};
 
+class Trie {
+public:
+	Trie();
+	// Recursively copying the string would be unnecessary
+	int find(const std::string & key, int key_start_pos = 0);
+	void insert(const std::string&  key, int value, int key_start_pos = 0 );
 
+	bool has_value;
+	int value;
+
+	Trie* subtrees[27];
+};
+
+// a HashMap from player_id into Player.
 template<unsigned int N>
 class PlayerHashMap : public HashMap<int, Player, N> {
 public:
