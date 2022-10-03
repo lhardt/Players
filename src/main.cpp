@@ -4,6 +4,7 @@
 #include <iostream>
 #include <fstream>
 #include <memory>
+#include <iomanip>
 
 #include "types.h"
 
@@ -48,7 +49,6 @@ void read_players_file(Repo & repo) {
 			repo.players.insert(p);
 			repo.player_ids.push_back(p.id);
 			++n_players;
-			//std::cout << std::string(p);
 		}
 	}
 	std::cout << "N-players: " << n_players << '\n';
@@ -81,17 +81,52 @@ int main() {
 		Clock this_clock("Generate Name Trie");
 		generate_name_trie(*repo);
 	}
+	{
 
-	while (true) {
-		std::string name_str;
-		std::cout << "Digite o nome:\n>>>\t";
-		std::getline(std::cin, name_str);
-
-		int player_id = repo->players_trie.find(name_str);
-		std::cout << "Player id is " << player_id << "\n";
-		
 	}
 
-	//printf("Hello, world!\n");
+	while (true) {
+		std::string query_string;
+		std::cout << "Consulta [player,user,topN,tags]:\n>>>\t";
+		std::getline(std::cin, query_string);
+
+		int first_space = query_string.find_first_of(' ');
+		if (first_space == -1) {
+			std::cout << "Tente Novamente.\n";
+			continue;
+		}
+
+		std::string until_first_space = query_string.substr(0, first_space);
+	
+		std::string param_str = query_string.substr(first_space + 1);
+		
+		std::cout << std::setiosflags(std::ios::left);
+
+		if (until_first_space == "player") {
+
+			std::vector<int> player_ids = repo->players_trie.find_all(param_str);
+			std::cout
+				<< std::setw(7) << "ID"
+				<< std::setw(40) << "Player Name"
+				<< std::setw(20) << "Positions"
+				<< std::setw(12) << "Rating"
+				<< std::setw(6) << "Count"
+				<< std::endl;
+			for (auto& id : player_ids) {
+				Player p = repo->players.find(id);
+				std::cout
+					<< std::setw(7) << p.id
+					<< std::setw(40) << p.name
+					<< std::setw(20) << p.get_positions_str()
+					<< std::setw(12) << p.rating
+					<< std::setw(6) << p.rating_count
+					<< std::endl;
+
+				
+			}
+		}
+
+		
+	}
 	return 0;
 }

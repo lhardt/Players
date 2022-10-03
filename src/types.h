@@ -9,7 +9,6 @@
 #include <iostream>
 #include <fstream>
 #include <array>
-#include <optional>
 
 class Player {
 public:
@@ -22,6 +21,7 @@ public:
 	Player();
 
 	operator std::string() const;
+	std::string get_positions_str();
 };
 
 template<typename K, typename T, unsigned int size>
@@ -53,9 +53,13 @@ private:
 
 class Trie {
 public:
+	static const int N_SUBTREES = 27;
+
 	Trie();
 	// Recursively copying the string would be unnecessary
 	int find(const std::string & key, int key_start_pos = 0);
+	std::vector<int> find_all(const std::string& key, int key_start_pos = 0);
+	std::vector<int> get_all();
 	void insert(const std::string&  key, int value, int key_start_pos = 0 );
 
 	bool has_value;
@@ -73,6 +77,13 @@ public:
 	virtual int get_key(Player);
 };
 
+template<unsigned int N>
+class PositionHashMap : public HashMap<std::string, int, N> {
+public: 
+	PositionHashMap();
+	virtual unsigned int get_key_hash(std::string);
+	virtual int get_key();
+};
 
 // Quick class that times its existence from constructor to destructor.
 class Clock {
