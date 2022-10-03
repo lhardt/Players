@@ -42,24 +42,23 @@ std::string Player::get_positions_str() {
 	return str;
 }
 
-
 template<typename K, typename T, unsigned int sz>
 HashMap<K,T,sz>::HashMap() : items(), item_used(), keys() {
 
 }
 
 template<typename K, typename T, unsigned int sz>
-T HashMap<K, T,sz>::find(K key) {
+T* HashMap<K, T,sz>::find(K key) {
 	int hash = get_key_hash(key) % sz;
 
 	while (this->item_used[hash]) {
 		if (keys[hash] == key) {
-			return items[hash % sz];
+			return & items[hash % sz];
 		}
 
 		hash = (hash + 1) % sz;
 	}
-	return items[0];
+	return NULL;
 }
 
 template<typename K, typename T, unsigned int sz>

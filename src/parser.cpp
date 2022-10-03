@@ -3,6 +3,31 @@
 #include <iostream>
 #include <fstream>
 
+bool get_next_rating(std::ifstream& file, Rating& r) {
+	std::string this_line;
+	std::getline(file, this_line);
+
+	if (this_line.length() == 0) return false;
+
+	
+	//{
+	//	int end = this_line.find(',');
+	//	r.id_user = std::stoi(this_line.substr(0, end));
+	//	this_line = this_line.substr(end + 1);
+	//}
+	//{
+	//	int end = this_line.find(',');
+	//	r.id_player = std::stoi(this_line.substr(0, end));
+	//	this_line = this_line.substr(end + 1);
+	//}
+	//{
+	//	int end = this_line.find(',');
+	//	r.rating = std::stod(this_line.substr(0, end));
+	//	this_line = this_line.substr(end + 1);
+	//}
+
+}
+
 bool get_next_player(std::ifstream &file, Player & p) {
 	
 	std::string this_line; 

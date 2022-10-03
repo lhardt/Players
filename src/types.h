@@ -24,11 +24,18 @@ public:
 	std::string get_positions_str();
 };
 
+class Rating {
+public:
+	int id_user;
+	int id_player;
+	int rating;
+};
+
 template<typename K, typename T, unsigned int size>
 class HashMap {
 public:
 	HashMap();
-	T find(K name);
+	T* find(K name);
 	void insert(T item);
 
 	virtual unsigned int get_key_hash(K) = 0;
@@ -96,6 +103,7 @@ public:
 
 
 bool get_next_player(std::ifstream &file, Player & p);
+bool get_next_rating(std::ifstream& file, Rating& r);
 
 
 #endif /* TYPES_H */
