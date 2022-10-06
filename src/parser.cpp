@@ -57,6 +57,7 @@ bool get_next_player(std::ifstream &file, Player & p) {
 			this_line = this_line.substr(next_comma+1, this_line.length() - 1);
 
 			p.positions.push_back(pos);
+			p.position_ids.push_back(position_to_index(pos)); 
 		}
 	}
 

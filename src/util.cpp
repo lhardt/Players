@@ -109,9 +109,9 @@ int OrderedVector<T>::binary_search(const T& value, int low, int high) {
 		int mid = (low + high) / 2;
 		
 		if (compare(value, this->at(mid))) {
-			low = mid;
+			low = mid+1;
 		} else {
-			high = mid;
+			high = mid-1;
 		}
 	}
 	return low;
@@ -242,6 +242,7 @@ template class HashMap<int, Player, 20000>;
 template class HashMap<int, User, 300000>;
 template class PlayerHashMap<20000>;
 template class UserHashMap<300000>;
+template class OrderedVector<Rating>;
 
 template<unsigned int N>
 PlayerHashMap<N>::PlayerHashMap() {
@@ -263,3 +264,23 @@ unsigned int UserHashMap<N>::get_key_hash(int id) {
 	return id;
 }
 
+int  position_to_index(const std::string& pos) {
+	std::vector<std::string> all_positions = { "CAM", "CB", "CDM", "CF", "CM", "GK", "LB", "LM", "LW", "LWB", "RB", "RM", "RW", "RWB", "ST" };
+
+	for (int i = 0; i < all_positions.size(); ++i) {
+		if (all_positions[i] == pos)
+			return i;
+	}
+	std::cout << "Warning: Ignoring position " << pos << "\n";
+	return -1;
+}
+
+std::string index_to_position(int i) {
+	std::vector<std::string> all_positions = { "CAM", "CB", "CDM", "CF", "CM", "GK", "LB", "LM", "LW", "LWB", "RB", "RM", "RW", "RWB", "ST" };
+
+	if (i < 0 || i >= all_positions.size()) {
+		std::cout << "Index to position misuse! " << i << "\n";
+	}
+
+	return all_positions[i];
+}

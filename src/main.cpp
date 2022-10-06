@@ -4,6 +4,7 @@
 #include <iostream>
 #include <fstream>
 #include <memory>
+#include <set>
 #include <iomanip>
 #include "types.h"
 
@@ -13,6 +14,8 @@ public:
 	PlayerHashMap<20000> players;
 	UserHashMap<300000> users;
 	Trie players_trie;
+
+	std::array<OrderedRatingVector, N_POSITIONS> players_in_position;
 	// For reference so that we can 
 	// create the tree asynchronously.
 	std::vector<int> player_ids;
@@ -35,20 +38,32 @@ void read_players_file(Repo & repo) {
 	if (!file.good()) {
 		std::cout << "Could'nt open players file!\ns";
 	}
+	// There are 18944 players.
 	int n_players = 0;
 	std::string first_line;
 	std::getline(file, first_line);
+
+	std::set<std::string> all_positions;
 
 	bool success = true;
 	while (file.good() && success) {
 		Player p;
 		success = get_next_player(file, p);
 		if (success) {
+			for (const std::string& pos : p.positions) {
+				all_positions.insert(pos);
+			}
+	
 			repo.players.insert(p);
 			repo.player_ids.push_back(p.id);
 			++n_players;
 		}
 	}
+	for (const std::string& pos : all_positions) {
+		std::cout << pos << ",";
+	}
+	std::cout << "\n";
+
 	std::cout << "N-players: " << n_players << '\n';
 }
 
@@ -117,6 +132,30 @@ void read_ratings_file(Repo& repo) {
 
 }
 
+void classify_players_position(Repo & repo) {
+	for (int id_player : repo.player_ids) {
+		Player* player = repo.players.find(id_player);
+		
+		if (player == NULL) continue;
+		if (player->rating_count < 1000) continue;
+		
+		for (int pos_id : player->position_ids) {
+			if (pos_id < 0 || pos_id >= N_POSITIONS) {
+				std::cout << "Invalid player position with pid " << player->id << "?\n";
+			}
+
+			Rating r;
+			r.id_player = id_player;
+			r.rating = player->rating;
+			repo.players_in_position[pos_id].ord_insert(r);
+		}
+	}
+
+	for (int i = 0; i < N_POSITIONS; ++i) {
+		std::cout << "\tPlayers in position " << index_to_position(i) << ": " << repo.players_in_position[i].size() << "\n";
+	}
+}
+
 void print_user_rating(int user_id, const std::vector<Rating> & ratings, const std::shared_ptr<Repo> & repo) {
 	double nota = 5.0;
 
@@ -137,28 +176,32 @@ void print_user_rating(int user_id, const std::vector<Rating> & ratings, const s
 	}
 }
 
-int main() {
-
-	std::shared_ptr<Repo> repo(new Repo());
-    //auto a = std::async(std::launch::async, &get_number, 5);
-
-	//std::this_thread::sleep_for(std::chrono::milliseconds(100));
-	//std::cout << "Before getting the result\n";
-
-	//int result = a.get();
+void load_repo(Repo & repo ) {
+	Clock all_clock("Loading Repo");
 
 	{
 		Clock this_clock("Read Players File");
-		read_players_file(*repo);
+		read_players_file(repo);
 	}
 	{
 		Clock this_clock("Generate Name Trie");
-		generate_name_trie(*repo);
+		generate_name_trie(repo);
 	}
 	{
 		Clock this_clock("Load Ratings");
-		read_ratings_file(*repo);
+		read_ratings_file(repo);
 	}
+	{
+		Clock this_clock("Classify Players");
+		classify_players_position(repo);
+	}
+}
+
+int main() {
+
+	std::shared_ptr<Repo> repo(new Repo());
+	
+	load_repo(*repo);
 
 	while (true) {
 		std::string query_string;
@@ -229,21 +272,42 @@ int main() {
 					<< std::endl;
 
 				print_user_rating(id_user, u->ratings, repo);
-				//for (Rating& r : u->ratings) {
-				//	Player* p = repo->players.find(r.id_player);
-					
-				//	if (p == NULL) { std::cout << "Rating without player? " << r.id_player << "\n"; }
-
-				//	std::cout
-				//		<< std::setw(7) << p->id
-				//		<< std::setw(40) << p->name
-				//		<< std::setw(20) << p->get_positions_str()
-				//		<< std::setw(12) << p->rating
-				//		<< std::setw(6) << r.rating
-				//		<< std::endl;
-				//}
 			}
 
+		}
+		
+		if (until_first_space.find("top") == 0) {
+			std::string n_top_str = until_first_space.substr(3);
+			
+			int n_top = std::stoi(n_top_str);
+			
+
+			int i_pos = position_to_index(param_str);
+			if (i_pos == -1) { std::cout << "Did not find the position <" << param_str << ">.\n"; continue; }
+			
+
+			if (n_top > repo->players_in_position[i_pos].size()) {
+				n_top = repo->players_in_position[i_pos].size();
+				std::cout << "There are only " << n_top << " players in this position (w/ +1000 ratings).\n";
+			}
+
+			std::cout << "Top " << n_top << "of position " << param_str << ":\n";
+
+			//std::vector<int> top_list = get_top_n(*repo, i_pos, n_top);
+
+
+			for (int i = 0; i < n_top; ++i) {
+				int id_player = repo->players_in_position[i_pos][i].id_player;
+
+				Player p = *(repo->players.find(id_player));
+				std::cout
+					<< std::setw(7) << p.id
+					<< std::setw(40) << p.name
+					<< std::setw(20) << p.get_positions_str()
+					<< std::setw(12) << p.rating
+					<< std::setw(6) << p.rating_count
+					<< std::endl;
+			}
 		}
 	
 	}

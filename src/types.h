@@ -10,11 +10,14 @@
 #include <fstream>
 #include <array>
 
+constexpr int N_POSITIONS = 15;
+
 class Player {
 public:
 	int id;
 	std::string name;
 	std::vector<std::string> positions;
+	std::vector<int> position_ids;
 	double rating;
 	int rating_count;
 		
@@ -138,5 +141,9 @@ public:
 
 
 bool get_next_player(std::ifstream &file, Player & p);
+
+int  position_to_index(const std::string& pos);
+std::string index_to_position(int i);
+
 
 #endif /* TYPES_H */
