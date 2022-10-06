@@ -98,7 +98,10 @@ void read_tags_file(Repo& repo) {
 
 				repo.tags.insert(new_info);
 			} else {
-				on_repo->player_ids.ord_insert(player_id);
+				// There are MANY repeated tags.	
+				if (on_repo->player_ids.find_ord(player_id) == -1) {
+					on_repo->player_ids.ord_insert(player_id);
+				}
 			}
 		}
 	}
@@ -259,6 +262,36 @@ std::vector<std::string> parse_tags_list(std::string param_str) {
 	return tags_list;
 }
 
+void tags_intersec_help(Repo & repo, std::vector<int> intersec, std::string tag) {
+	TagInfo * info = repo.tags.find(tag);
+	if (info == NULL) { std::cout << "Intersec misuse? <" << tag << ">\n"; return; }
+
+	OrderedIntVector info_ids = info->player_ids;
+
+	for (int i = 0; i < intersec.size(); ++i) {
+		if (info_ids.find_ord(intersec[i]) == -1) {
+			intersec.erase(intersec.begin() + i);
+			--i;
+		}
+	}
+}
+
+std::vector<int> tags_intersec(Repo& repo, std::vector<std::string> tags) {
+	if (tags.size() == 0) return std::vector<int>();
+
+	TagInfo * first_info = repo.tags.find(tags[0]);
+
+	if (first_info == NULL) { std::cout << "TagInfo misuse? <" << tags[0] << ">\n"; return std::vector<int>(); }
+
+	std::vector<int> intersec(first_info->player_ids);
+
+	for (int i = 1; i < tags.size(); ++i) {
+		tags_intersec_help(repo, intersec, tags[i]);
+	}
+
+	return intersec;
+}
+
 int main() {
 
 	std::shared_ptr<Repo> repo(new Repo());
@@ -367,6 +400,20 @@ int main() {
 			}
 		} else if (until_first_space == "tags") {
 			std::vector<std::string> tags_list = parse_tags_list(param_str);
+
+			std::vector<int> player_ids = tags_intersec(*repo, tags_list);
+			
+			for (const int id : player_ids) {
+				Player p = *(repo->players.find(id));
+				std::cout
+					<< std::setw(7) << p.id
+					<< std::setw(40) << p.name
+					<< std::setw(20) << p.get_positions_str()
+					<< std::setw(12) << p.rating
+					<< std::setw(6) << p.rating_count
+					<< std::endl;
+			}
+
 		} else {
 			std::cout << "Query not recognized. <" << until_first_space << ">\n";
 		}

@@ -34,6 +34,8 @@ class OrderedVector : public std::vector<T> {
 public:
 	void ord_insert(const T&);
 	virtual bool compare(const T& a, const T& b) = 0;
+	virtual bool equals(const T& a, const T& b) = 0;
+	int find_ord(const T& val);
 
 private:
 	int binary_search(const T& value, int low, int high);
@@ -42,11 +44,13 @@ private:
 class OrderedIntVector : public OrderedVector<int> {
 public:
 	virtual bool compare(const int& r1, const int& r2);
+	virtual bool equals(const int& a, const int& b);
 };
 
 
 class OrderedRatingVector : public OrderedVector<Rating> {
 	virtual bool compare(const Rating& r1, const Rating& r2);
+	virtual bool equals(const Rating& a, const Rating& b);
 };
 
 class Rating {

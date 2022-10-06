@@ -117,12 +117,30 @@ int OrderedVector<T>::binary_search(const T& value, int low, int high) {
 	return low;
 }
 
+template<typename T>
+int OrderedVector<T>::find_ord(const T& val) {
+	int bin_search = binary_search(val, 0, this->size() - 1);
+
+	if (bin_search >= this->size()) return -1;
+	if (equals(this->at(bin_search), val)) return bin_search;
+
+	return -1;
+}
+
 bool OrderedRatingVector::compare(const Rating& r1, const Rating& r2) {
 	return r1.rating < r2.rating;
 }
 
+bool OrderedRatingVector::equals(const Rating& r1, const Rating& r2) {
+	return r1.rating == r2.rating;
+}
+
+
 bool OrderedIntVector::compare(const int& i1, const int& i2) {
 	return i1 < i2;
+}
+bool OrderedIntVector::equals(const int& i1, const int& i2) {
+	return i1 == i2;
 }
 
 
