@@ -22,7 +22,7 @@ public:
 	// List of player ids in parsing order.
 	std::vector<int> player_ids;
 	// A HashMap of (tag_name, list_of( player_ids )), list in order of growing id.
-	TagHashMap<10000> tags;
+	TagHashMap<40000> tags;
 };
 
 Repo::Repo(){ }
@@ -112,7 +112,7 @@ void read_ratings_file(Repo& repo) {
 	// Using FILE here because ifstream would be too slow.
 
 	FILE* c_file;
-	int error = fopen_s(&c_file, "minirating.csv", "r");
+	int error = fopen_s(&c_file, "rating.csv", "r");
 	int n_ratings = 0;
 
 	// There are 138493 different user ids.
@@ -262,7 +262,7 @@ std::vector<std::string> parse_tags_list(std::string param_str) {
 	return tags_list;
 }
 
-void tags_intersec_help(Repo & repo, std::vector<int> intersec, std::string tag) {
+void tags_intersec_help(Repo & repo, std::vector<int> &intersec, std::string tag) {
 	TagInfo * info = repo.tags.find(tag);
 	if (info == NULL) { std::cout << "Intersec misuse? <" << tag << ">\n"; return; }
 

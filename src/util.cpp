@@ -254,9 +254,9 @@ unsigned int PlayerHashMap<N>::get_key_hash(int id) {
 
 template class HashMap<int, Player, 20000>;
 template class HashMap<int, User, 300000>;
-template class HashMap<std::string, TagInfo, 10000>;
+template class HashMap<std::string, TagInfo, 40000>;
 template class PlayerHashMap<20000>;
-template class TagHashMap<10000>;
+template class TagHashMap<40000>;
 template class UserHashMap<300000>;
 template class OrderedVector<Rating>;
 template class OrderedVector<int>;
