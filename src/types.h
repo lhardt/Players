@@ -24,11 +24,37 @@ public:
 	std::string get_positions_str();
 };
 
+class Rating;
+
+template<typename T>
+class OrderedVector : public std::vector<T> {
+public:
+	void ord_insert(const T&);
+	virtual bool compare(const T& a, const T& b) = 0;
+
+private:
+	int binary_search(const T& value, int low, int high);
+};
+
+
+class OrderedRatingVector : public OrderedVector<Rating> {
+	virtual bool compare(const Rating& r1, const Rating& r2);
+};
+
 class Rating {
 public:
-	int id_user;
 	int id_player;
-	int rating;
+	double rating;
+};
+
+class User {
+public:
+	User();
+	User(int id);
+	void add_rating(int id_player, double rating);
+
+	int id;
+	OrderedRatingVector ratings;
 };
 
 template<typename K, typename T, unsigned int size>
@@ -85,6 +111,15 @@ public:
 };
 
 template<unsigned int N>
+class UserHashMap : public HashMap<int, User, N>{
+public:
+	UserHashMap();
+	virtual unsigned int get_key_hash(int);
+	virtual int get_key(User);
+};
+
+
+template<unsigned int N>
 class PositionHashMap : public HashMap<std::string, int, N> {
 public: 
 	PositionHashMap();
@@ -103,7 +138,5 @@ public:
 
 
 bool get_next_player(std::ifstream &file, Player & p);
-bool get_next_rating(std::ifstream& file, Rating& r);
-
 
 #endif /* TYPES_H */

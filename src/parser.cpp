@@ -3,13 +3,13 @@
 #include <iostream>
 #include <fstream>
 
-bool get_next_rating(std::ifstream& file, Rating& r) {
-	std::string this_line;
-	std::getline(file, this_line);
 
-	if (this_line.length() == 0) return false;
+// This method is too slow. It is faster to use fscanf.
+//bool get_next_rating(std::ifstream& file, Rating& r) {
+//	std::string this_line;
+//	std::getline(file, this_line);
 
-	
+//	if (this_line.length() == 0) return false;
 	//{
 	//	int end = this_line.find(',');
 	//	r.id_user = std::stoi(this_line.substr(0, end));
@@ -25,8 +25,7 @@ bool get_next_rating(std::ifstream& file, Rating& r) {
 	//	r.rating = std::stod(this_line.substr(0, end));
 	//	this_line = this_line.substr(end + 1);
 	//}
-
-}
+//}
 
 bool get_next_player(std::ifstream &file, Player & p) {
 	

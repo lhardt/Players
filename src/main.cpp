@@ -5,15 +5,13 @@
 #include <fstream>
 #include <memory>
 #include <iomanip>
-
 #include "types.h"
-
-
 
 class Repo {
 public:
 	Repo();
 	PlayerHashMap<20000> players;
+	UserHashMap<300000> users;
 	Trie players_trie;
 	// For reference so that we can 
 	// create the tree asynchronously.
@@ -70,6 +68,8 @@ void read_ratings_file(Repo& repo) {
 	int error = fopen_s(&c_file, "rating.csv", "r");
 	int n_ratings = 0;
 
+	// There are 138493 different user ids.
+
 	if (c_file == NULL) {
 		std::cout << "Error!\n";
 		return;
@@ -86,10 +86,20 @@ void read_ratings_file(Repo& repo) {
 		success = ret_val == 3;
 
 		if (success) {
+
 			Player* p = repo.players.find(id_player);
 			p->rating += rating;
 			p->rating_count += 1;
 			++n_ratings;
+
+			User* u = repo.users.find(id_user);
+			if (u == NULL) {
+				User user(id_user);
+				user.add_rating(id_player, rating);
+				repo.users.insert(user);
+			} else {
+				u->add_rating(id_player, rating);
+			}
 		}
 	}
 
@@ -106,7 +116,27 @@ void read_ratings_file(Repo& repo) {
 	std::cout << "N-ratings: " << n_ratings << '\n';
 
 }
-	
+
+void print_user_rating(int user_id, const std::vector<Rating> & ratings, const std::shared_ptr<Repo> & repo) {
+	double nota = 5.0;
+
+	while (nota >= 0.0) {
+		for (const Rating& r : ratings) {
+			if (r.rating == nota) {
+				Player* p = repo->players.find(r.id_player);
+				std::cout
+					<< std::setw(7) << p->id
+					<< std::setw(40) << p->name
+					<< std::setw(20) << p->get_positions_str()
+					<< std::setw(12) << p->rating
+					<< std::setw(6) << r.rating
+					<< std::endl;
+			}
+		}
+		nota -= 0.5;
+	}
+}
+
 int main() {
 
 	std::shared_ptr<Repo> repo(new Repo());
@@ -150,6 +180,12 @@ int main() {
 		if (until_first_space == "player") {
 
 			std::vector<int> player_ids = repo->players_trie.find_all(param_str);
+			
+			if (player_ids.size() == 0) {
+				std::cout << "No such players found.\n";
+				continue;
+			}
+
 			std::cout
 				<< std::setw(7) << "ID"
 				<< std::setw(40) << "Player Name"
@@ -167,6 +203,47 @@ int main() {
 					<< std::setw(6) << p.rating_count
 					<< std::endl;
 			}
+		}
+		if (until_first_space == "user") {
+			int id_user = std::stoi(param_str);
+
+			User* u = repo->users.find(id_user);
+
+			if (u == NULL) {
+				std::cout << "Not found.\n";
+				continue;
+			} else {
+				if (u->ratings.size() == 0) {
+					std::cout << "This user hasn't rated any player.\n";
+					continue;
+				}
+
+				std::cout << "His ratings: \n";
+
+				std::cout
+					<< std::setw(7) << "ID"
+					<< std::setw(40) << "Player Name"
+					<< std::setw(20) << "Positions"
+					<< std::setw(12) << "Av. Rating"
+					<< std::setw(6) << "Usr. Rating"
+					<< std::endl;
+
+				print_user_rating(id_user, u->ratings, repo);
+				//for (Rating& r : u->ratings) {
+				//	Player* p = repo->players.find(r.id_player);
+					
+				//	if (p == NULL) { std::cout << "Rating without player? " << r.id_player << "\n"; }
+
+				//	std::cout
+				//		<< std::setw(7) << p->id
+				//		<< std::setw(40) << p->name
+				//		<< std::setw(20) << p->get_positions_str()
+				//		<< std::setw(12) << p->rating
+				//		<< std::setw(6) << r.rating
+				//		<< std::endl;
+				//}
+			}
+
 		}
 	
 	}

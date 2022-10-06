@@ -42,6 +42,27 @@ std::string Player::get_positions_str() {
 	return str;
 }
 
+
+User::User() : id(-1), ratings() {
+
+}
+
+User::User(int _id) : id(_id), ratings() {
+
+}
+
+void User::add_rating(int id_player, double rating) {
+	Rating r;
+	r.id_player = id_player;
+	r.rating = rating;
+
+	// too slow
+	//ratings.ord_insert(r);
+	ratings.push_back(r);
+}
+
+
+
 template<typename K, typename T, unsigned int sz>
 HashMap<K,T,sz>::HashMap() : items(), item_used(), keys() {
 
@@ -76,6 +97,39 @@ void HashMap<K, T,sz>::insert(T item) {
 }
 
 
+template<typename T>
+void OrderedVector<T>::ord_insert(const T& val) {
+	int place_to_insert = binary_search(val, 0, this->size()-1);
+	this->insert(this->begin() + place_to_insert, val);
+}
+
+template<typename T>
+int OrderedVector<T>::binary_search(const T& value, int low, int high) {
+	while (low <= high) {
+		int mid = (low + high) / 2;
+		
+		if (compare(value, this->at(mid))) {
+			low = mid;
+		} else {
+			high = mid;
+		}
+	}
+	return low;
+}
+
+bool OrderedRatingVector::compare(const Rating& r1, const Rating& r2) {
+	return r1.rating < r2.rating;
+}
+
+
+//template<typename T>
+//bool OrderedVector<T>::compare(const T& a, const T& b) {
+//
+//}
+
+
+
+
 int get_key_subarray(const std::string & str, int str_start_pos) {
 	if (str_start_pos >= str.length()) return -1;
 	if (str_start_pos < -1) {
@@ -85,13 +139,13 @@ int get_key_subarray(const std::string & str, int str_start_pos) {
 
 	char chr = str[str_start_pos];
 	
-	if (chr >= 'a' && chr <= 'z') return chr - 'a';
-	if (chr >= 'A' && chr <= 'Z') return chr - 'A';
-	if (chr >= '0' && chr <= '9') return 26;
-	if (chr >= '\'' || chr <= ' ' || chr == '-') return 26;
+	if (chr >= 'a' && chr <= 'z') return 1 + chr - 'a';
+	if (chr >= 'A' && chr <= 'Z') return 1 + chr - 'A';
+	if (chr >= '0' && chr <= '9') return 0;
+	if (chr >= '\'' || chr <= ' ' || chr == '-') return 0;
 
 	printf("Warning: Ignoring Character %x(%c)\n", chr, chr);
-	return Trie::N_SUBTREES-1;
+	return 0;
 }
 
 Trie::Trie() {
@@ -185,9 +239,27 @@ unsigned int PlayerHashMap<N>::get_key_hash(int id) {
 }
 
 template class HashMap<int, Player, 20000>;
+template class HashMap<int, User, 300000>;
 template class PlayerHashMap<20000>;
+template class UserHashMap<300000>;
 
 template<unsigned int N>
 PlayerHashMap<N>::PlayerHashMap() {
 
 }
+
+template<unsigned int N>
+UserHashMap<N>::UserHashMap() {
+
+}
+
+template<unsigned int N>
+int UserHashMap<N>::get_key(User u) {
+	return u.id;
+}
+
+template<unsigned int N>
+unsigned int UserHashMap<N>::get_key_hash(int id) {
+	return id;
+}
+
