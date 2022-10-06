@@ -27,12 +27,34 @@
 	//}
 //}
 
+bool get_next_taginfo(std::ifstream& file, std::string & tag_name, int & player_id) {
+	std::string this_line;
+	std::getline(file, this_line);
+
+	if (this_line.length() == 0) return false;
+
+	{
+		int end = this_line.find(',');
+		// int user_id = std::stoi(this_line.substr(0, end));
+		this_line = this_line.substr(end + 1);
+	}
+	{
+		int end = this_line.find(',');
+		player_id = std::stoi(this_line.substr(0, end));
+		this_line = this_line.substr(end + 1);
+	}
+	{
+		tag_name = this_line;	
+	}
+}
+
 bool get_next_player(std::ifstream &file, Player & p) {
 	
 	std::string this_line; 
 	std::getline(file, this_line);
 
 	if (this_line.length() == 0) return false;
+	
 	{
 		int end = this_line.find(',');
 		p.id = std::stoi(this_line.substr(0, end));

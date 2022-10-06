@@ -39,6 +39,11 @@ private:
 	int binary_search(const T& value, int low, int high);
 };
 
+class OrderedIntVector : public OrderedVector<int> {
+public:
+	virtual bool compare(const int& r1, const int& r2);
+};
+
 
 class OrderedRatingVector : public OrderedVector<Rating> {
 	virtual bool compare(const Rating& r1, const Rating& r2);
@@ -76,16 +81,11 @@ private:
 	std::array<bool, size> item_used;
 };
 
-//template<typename K, typename T>
-//class OrderedMap {
-//public:
-//	OrderedMap();
-//	T find(K key);
-//	void add(K key, T value);
-//
-//private:
-//	std::vector<T> items;
-//};
+class TagInfo {
+public:
+	std::string tag_name;
+	OrderedIntVector player_ids;
+};
 
 class Trie {
 public:
@@ -121,6 +121,15 @@ public:
 	virtual int get_key(User);
 };
 
+template<unsigned int N>
+class TagHashMap : public HashMap<std::string, TagInfo, N> {
+public:
+	TagHashMap();
+	virtual unsigned int get_key_hash(std::string);
+	virtual std::string get_key(TagInfo);
+};
+
+
 
 template<unsigned int N>
 class PositionHashMap : public HashMap<std::string, int, N> {
@@ -141,7 +150,7 @@ public:
 
 
 bool get_next_player(std::ifstream &file, Player & p);
-
+bool get_next_taginfo(std::ifstream& file, std::string& tag_name, int& player_id);
 int  position_to_index(const std::string& pos);
 std::string index_to_position(int i);
 

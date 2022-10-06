@@ -121,13 +121,9 @@ bool OrderedRatingVector::compare(const Rating& r1, const Rating& r2) {
 	return r1.rating < r2.rating;
 }
 
-
-//template<typename T>
-//bool OrderedVector<T>::compare(const T& a, const T& b) {
-//
-//}
-
-
+bool OrderedIntVector::compare(const int& i1, const int& i2) {
+	return i1 < i2;
+}
 
 
 int get_key_subarray(const std::string & str, int str_start_pos) {
@@ -240,19 +236,22 @@ unsigned int PlayerHashMap<N>::get_key_hash(int id) {
 
 template class HashMap<int, Player, 20000>;
 template class HashMap<int, User, 300000>;
+template class HashMap<std::string, TagInfo, 10000>;
 template class PlayerHashMap<20000>;
+template class TagHashMap<10000>;
 template class UserHashMap<300000>;
 template class OrderedVector<Rating>;
+template class OrderedVector<int>;
 
 template<unsigned int N>
-PlayerHashMap<N>::PlayerHashMap() {
-
-}
+PlayerHashMap<N>::PlayerHashMap() { }
 
 template<unsigned int N>
-UserHashMap<N>::UserHashMap() {
+UserHashMap<N>::UserHashMap() { }
 
-}
+template<unsigned int N>
+TagHashMap<N>::TagHashMap() { }
+
 
 template<unsigned int N>
 int UserHashMap<N>::get_key(User u) {
@@ -264,6 +263,18 @@ unsigned int UserHashMap<N>::get_key_hash(int id) {
 	return id;
 }
 
+template<unsigned int N>
+std::string TagHashMap<N>::get_key(TagInfo u) {
+	return u.tag_name;
+}
+
+template<unsigned int N>
+unsigned int TagHashMap<N>::get_key_hash(std::string item) {
+	return str_get_hash(item);
+}
+
+
+
 int  position_to_index(const std::string& pos) {
 	std::vector<std::string> all_positions = { "CAM", "CB", "CDM", "CF", "CM", "GK", "LB", "LM", "LW", "LWB", "RB", "RM", "RW", "RWB", "ST" };
 
@@ -271,7 +282,7 @@ int  position_to_index(const std::string& pos) {
 		if (all_positions[i] == pos)
 			return i;
 	}
-	std::cout << "Warning: Ignoring position " << pos << "\n";
+	std::cout << "\tWarning: Ignoring position " << pos << "\n";
 	return -1;
 }
 
